@@ -63,9 +63,14 @@ module ActiveUUID
           simplified_type_without_uuid(field_type)
         end
 
-        alias_method_chain :type_cast, :uuid
-        alias_method_chain :type_cast_code, :uuid if ActiveRecord::VERSION::MAJOR < 4
-        alias_method_chain :simplified_type, :uuid
+        alias_method :type_cast, :uuid
+        alias_method :uuid, :type_cast
+        if ActiveRecord::VERSION::MAJOR < 4
+          alias_method :type_cast_code, :uuid
+          alias_method :uuid, :type_cast_code
+        end
+        alias_method :simplified_type, :uuid
+        alias_method :uuid, :simplified_type
       end
     end
 
@@ -103,14 +108,18 @@ module ActiveUUID
           return UUIDTools::UUID.serialize(value) if type == :uuid
           type_cast_without_uuid(value)
         end
-        alias_method_chain :type_cast, :uuid if ActiveRecord::VERSION::MAJOR >= 4
+        if ActiveRecord::VERSION::MAJOR >= 4
+          alias_method :type_cast, :uuid
+          alias_method :uuid, :type_cast
+        end
 
         def simplified_type_with_pguuid(field_type)
           return :uuid if field_type == 'uuid'
           simplified_type_without_pguuid(field_type)
         end
 
-        alias_method_chain :simplified_type, :pguuid
+        alias_method :simplified_type, :pguuid
+        alias_method :pguuid, :simplified_type
       end
     end
 
@@ -132,9 +141,12 @@ module ActiveUUID
           @native_database_types ||= native_database_types_without_uuid.merge(uuid: { name: 'binary', limit: 16 })
         end
 
-        alias_method_chain :quote, :visiting
-        alias_method_chain :type_cast, :visiting
-        alias_method_chain :native_database_types, :uuid
+        alias_method :quote, :visiting
+        alias_method :visiting, :quote
+        alias_method :type_cast, :visiting
+        alias_method :visiting, :type_cast
+        alias_method :native_database_types, :uuid
+        alias_method :uuid, :native_database_types
       end
     end
 
@@ -158,9 +170,12 @@ module ActiveUUID
           @native_database_types ||= native_database_types_without_pguuid.merge(uuid: { name: 'uuid' })
         end
 
-        alias_method_chain :quote, :visiting
-        alias_method_chain :type_cast, :visiting
-        alias_method_chain :native_database_types, :pguuid
+        alias_method :quote, :visiting
+        alias_method :visiting, :quote
+        alias_method :type_cast, :visiting
+        alias_method :visiting, :type_cast
+        alias_method :native_database_types, :pguuid
+        alias_method :pguuid, :native_database_types
       end
     end
 
@@ -173,7 +188,8 @@ module ActiveUUID
           register_class_with_limit m, /binary\(16(,0)?\)/i, ::ActiveRecord::Type::UUID
         end
 
-        alias_method_chain :initialize_type_map, :uuid
+        alias_method :initialize_type_map, :uuid
+        alias_method :uuid, :initialize_type_map
       end
     end
 
